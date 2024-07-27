@@ -8,6 +8,7 @@ import pandas as pd
 from datetime import datetime
 import botocore.exceptions
 import logging
+import os
 
 # Logging configuration
 logging.basicConfig(level=logging.INFO)
@@ -18,6 +19,10 @@ ecr_client = boto3.client('ecr')
 s3_client = boto3.client('s3')
 sns_client = boto3.client('sns')
 
+# Accessing environment variables
+bucket_name = os.environ['BUCKET_NAME']
+repository_name = os.environ['REPOSITORY_NAME']
+topic_arn = os.environ['TOPIC_ARN']
 
 # Defining the method to obtain the ECR registry information and getting the registryId that will be needed as a parameter for the next method.
 def get_registry_id():
@@ -210,5 +215,4 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': 'Findings processed and uploaded successfully'
     }
-
 
