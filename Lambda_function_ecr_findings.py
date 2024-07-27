@@ -13,16 +13,11 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
-# Defining boto3 clients for the connection to the AWS services
+# Defining boto3 clients for the connection to AWS services
 ecr_client = boto3.client('ecr')
 s3_client = boto3.client('s3')
 sns_client = boto3.client('sns')
 
-# Defining the bucket name variable to store the findings and the ECR repository name
-bucket_name = 's3-ecr-findings'
-repository_name = 'ecr-test'
-object_name = ''
-topic_arn = 'arn:aws:sns:us-east-1:066849108148:ecr-findings-notifications'
 
 # Defining the method to obtain the ECR registry information and getting the registryId that will be needed as a parameter for the next method.
 def get_registry_id():
@@ -143,9 +138,20 @@ def publish_to_sns(url, topic_arn):
         logger.error("Failed to publish message to SNS: %s", error)
         return None
 
-# Lambda handler function
+
 def lambda_handler(event, context):
-    # Lambda function main execution starts here
+      # Extract parameters from the event or context
+    bucket_name = event.get('bucket_name')
+    repository_name = event.get('repository_name')
+    topic_arn = event.get('topic_arn')
+    
+    if not all([bucket_name, repository_name, topic_arn]):
+        logger.error("Missing required parameters: bucket_name, repository_name, and topic_arn")
+        return {
+            'statusCode': 400,
+            'body': 'Missing required parameters: bucket_name, repository_name, and topic_arn'
+        }
+    
     registry_id = get_registry_id()
     if not registry_id:
         return {
@@ -204,4 +210,5 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': 'Findings processed and uploaded successfully'
     }
+
 
