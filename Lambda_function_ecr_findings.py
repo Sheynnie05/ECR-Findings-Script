@@ -19,10 +19,7 @@ ecr_client = boto3.client('ecr')
 s3_client = boto3.client('s3')
 sns_client = boto3.client('sns')
 
-# Accessing environment variables
-bucket_name = os.environ['BUCKET_NAME']
-repository_name = os.environ['REPOSITORY_NAME']
-topic_arn = os.environ['TOPIC_ARN']
+
 
 # Defining the method to obtain the ECR registry information and getting the registryId that will be needed as a parameter for the next method.
 def get_registry_id():
@@ -145,10 +142,12 @@ def publish_to_sns(url, topic_arn):
 
 
 def lambda_handler(event, context):
-      # Extract parameters from the event or context
-    bucket_name = event.get('bucket_name')
-    repository_name = event.get('repository_name')
-    topic_arn = event.get('topic_arn')
+    # Accessing environment variables
+    bucket_name = os.environ["BUCKET_NAME"]
+    repository_name = os.environ["REPOSITORY_NAME"]
+    topic_arn = os.environ["TOPIC_ARN"]  
+    
+
     
     if not all([bucket_name, repository_name, topic_arn]):
         logger.error("Missing required parameters: bucket_name, repository_name, and topic_arn")
@@ -215,4 +214,3 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': 'Findings processed and uploaded successfully'
     }
-
